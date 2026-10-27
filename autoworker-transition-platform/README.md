@@ -2,6 +2,8 @@
 
 About 2,760 hourly workers at **Stellantis Brampton Assembly** (idle since February 2025, with a sale to Roshel pending) and 1,200 at **GM CAMI Ingersoll** (idle since BrightDrop production ended in October 2025) need new work. Next Shift matches each worker's skills to real job openings within driving distance, shows the pay and skill gaps, and points to nearby training and funding. It also gives planners an estimate of how many workers local openings can absorb and where retraining money does the most good. It also tests which new products each plant's workforce could build if the plant were retooled.
 
+**Live app:** [Open Next Shift](https://claude.ai/artifact/TosuEsDPFk3BEKgXYeCTBy). It runs in the browser with nothing to install. To build it locally, see **Run it** below.
+
 Independent analysis built on public data. Not produced by or affiliated with Stellantis, General Motors, Unifor, or any government.
 
 ## What it does
