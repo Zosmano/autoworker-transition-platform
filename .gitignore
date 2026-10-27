@@ -1,0 +1,13 @@
+# Downloaded source data (public, but large) and caches; see README for sources
+data/raw/
+data/cache/
+*.zip
+
+# Generated outputs (rebuild with `python run_all.py`)
+outputs/
+
+.claude/
+__pycache__/
+*.pyc
+.venv/
+venv/
