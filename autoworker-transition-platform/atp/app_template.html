@@ -1,0 +1,685 @@
+<title>Next Shift</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: plant-floor work order. A steel header band with a safety-stripe edge, tabs, then a control rail beside a ranked list. */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --sunk:#e8ecf0; --ink:#14202b; --ink2:#46545f; --muted:#6f7c87; --line:#d6dde3;
+  --steel:#1e4d74; --steel-ink:#ffffff; --steel-soft:#dbe6f0; --amber:#e5a21a; --amber-ink:#7a4f00; --amber-soft:#fbefd2;
+  --good:#1b7444; --good-soft:#dcefe3; --warn:#9a5b00; --crit:#a8281f; --crit-soft:#f8e1de;
+  --band:#152a3d; --band-ink:#eef3f7; --band-muted:#a9bccb;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e141a; --surface:#16202a; --sunk:#1c2833; --ink:#e4ebf1; --ink2:#a9b7c3; --muted:#7f8d99; --line:#2a3743;
+  --steel:#6aa6da; --steel-ink:#0b1620; --steel-soft:#1f3346; --amber:#f0b33a; --amber-ink:#f0b33a; --amber-soft:#3a2d12;
+  --good:#52c28a; --good-soft:#173528; --warn:#f0b33a; --crit:#ff7a6e; --crit-soft:#3d1c1a;
+  --band:#0a1118; --band-ink:#e4ebf1; --band-muted:#8ea3b4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e141a; --surface:#16202a; --sunk:#1c2833; --ink:#e4ebf1; --ink2:#a9b7c3; --muted:#7f8d99; --line:#2a3743;
+  --steel:#6aa6da; --steel-ink:#0b1620; --steel-soft:#1f3346; --amber:#f0b33a; --amber-ink:#f0b33a; --amber-soft:#3a2d12;
+  --good:#52c28a; --good-soft:#173528; --warn:#f0b33a; --crit:#ff7a6e; --crit-soft:#3d1c1a;
+  --band:#0a1118; --band-ink:#e4ebf1; --band-muted:#8ea3b4; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--band);color:var(--band-ink)}
+header.band .wrap{padding-block:28px 22px;display:grid;gap:14px}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand h1{font:700 44px/1 var(--f-display);letter-spacing:.01em;margin:0;text-transform:uppercase}
+.brand span{font:500 13px/1 var(--f-mono);color:var(--band-muted);letter-spacing:.08em;text-transform:uppercase}
+.lede{margin:0;max-width:68ch;color:var(--band-muted);font-size:17px}
+.lede b{color:var(--band-ink);font-weight:600}
+.stripe{height:10px;background:repeating-linear-gradient(-45deg,var(--amber) 0 14px,var(--band) 14px 28px)}
+.plants{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.18);border-radius:4px;padding:5px 10px;font:500 13px/1.2 var(--f-mono);color:var(--band-ink)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block}
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
+nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto}
+nav.tabs a{font:600 15px/1 var(--f-body);color:var(--ink2);text-decoration:none;padding:15px 14px 13px;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--amber)}
+nav.tabs a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,.row:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+main .wrap{padding-block:24px 64px}
+section[hidden]{display:none}
+h2{font:700 28px/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.01em;margin:0 0 6px;text-wrap:balance}
+h3{font:700 19px/1.2 var(--f-display);text-transform:uppercase;letter-spacing:.02em;margin:0 0 8px}
+.sub{color:var(--ink2);margin:0 0 18px;max-width:72ch}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px)}
+@media (max-width:900px){.rail{position:static}}
+label.f{display:grid;gap:6px;font-weight:600;font-size:14px}
+label.f small{font-weight:400;color:var(--muted);font-size:13px}
+select,input[type=number],input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px;width:100%;min-width:0}
+input[type=range]{width:100%;accent-color:var(--steel)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:600 14px/1 var(--f-body);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:8px 11px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--steel);border-color:var(--steel);color:var(--steel-ink)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.summary{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin:0 0 14px;color:var(--ink2)}
+.summary b{color:var(--ink)}
+/* ranked list */
+.list{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.head,.row{display:grid;grid-template-columns:minmax(0,2.6fr) 1.2fr .9fr 1.2fr 1fr .6fr;gap:12px;align-items:center;padding:12px 16px}
+.head{font:500 12px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sunk);border-bottom:1px solid var(--line)}
+.row{border-bottom:1px solid var(--line);cursor:pointer}
+.row:hover{background:var(--sunk)}
+.row[aria-expanded="true"]{background:var(--steel-soft)}
+.occ{min-width:0}
+.occ b{display:block;font-weight:600;line-height:1.25}
+.occ .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center}
+.code{font:500 12px/1 var(--f-mono);color:var(--muted)}
+.pill{font:600 11px/1 var(--f-body);text-transform:uppercase;letter-spacing:.05em;border-radius:3px;padding:4px 6px}
+.pill.go{background:var(--good-soft);color:var(--good)}
+.pill.lic{background:var(--amber-soft);color:var(--amber-ink)}
+.pill.long{background:var(--crit-soft);color:var(--crit)}
+.meter{display:grid;gap:4px}
+.meter .bar{height:8px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--steel)}
+.num{font:500 15px/1.2 var(--f-mono);font-variant-numeric:tabular-nums}
+.num small{display:block;font:400 12px/1.3 var(--f-body);color:var(--muted)}
+.up{color:var(--good)}.down{color:var(--crit)}.flat{color:var(--ink2)}
+.score{font:700 22px/1 var(--f-display);text-align:right}
+@media (max-width:760px){
+  .head{display:none}
+  .row{grid-template-columns:1fr 1fr;grid-template-areas:"occ occ" "m o" "p t";row-gap:10px}
+  .row .occ{grid-area:occ}.row .c-m{grid-area:m}.row .c-o{grid-area:o}.row .c-p{grid-area:p}.row .c-t{grid-area:t}.row .score{display:none}
+  .row .num small.lbl{display:block}
+}
+.num small.lbl{display:none;text-transform:uppercase;letter-spacing:.05em;font-size:11px}
+.detail{padding:18px 16px 22px;border-bottom:1px solid var(--line);background:var(--bg);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media (max-width:900px){.detail{grid-template-columns:minmax(0,1fr)}}
+.detail h4{font:600 13px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 10px}
+.gap{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+.gapbar{position:relative;height:12px;background:var(--sunk);border-radius:2px}
+.gapbar .you{position:absolute;left:0;top:0;bottom:0;background:var(--steel);border-radius:2px}
+.gapbar .need{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--amber)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:10px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px}
+ul.plain{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.plain li{font-size:14px}
+.prog{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.prog a{color:var(--steel);font-weight:600}
+.prog .k{font:500 12px/1.3 var(--f-mono);color:var(--muted);text-align:right}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{font:500 11px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.r,table.t th.r{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto}
+a{color:var(--steel)}
+.more{margin-top:10px;font-size:14px}
+.empty{padding:28px 16px;color:var(--ink2)}
+/* planner */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.tile .k{font:500 12px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tile .v{font:700 38px/1.05 var(--f-display);margin-top:6px}
+.tile .n{font-size:13px;color:var(--ink2)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;margin-bottom:20px;min-width:0}
+.stack{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+@media (max-width:600px){.stack{grid-template-columns:minmax(0,1fr) 80px}.stack .sb{grid-column:1/-1;order:3}}
+.sb{display:flex;height:16px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.sb .p{background:var(--steel)}
+.sb .u{background:repeating-linear-gradient(-45deg,var(--amber) 0 5px,var(--amber-soft) 5px 10px)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.status{border-left:4px solid var(--amber);padding:2px 0 2px 12px;margin:0 0 12px}
+.status b{display:block}
+.fine{font-size:13px;color:var(--muted)}
+.prose{max-width:76ch}
+.prose p,.prose li{color:var(--ink2)}
+.prose h3{margin-top:26px}
+/* new products */
+.prow{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,2.2fr) .8fr .9fr;gap:14px;align-items:center;padding:13px 16px}
+.list .phead{font:500 12px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sunk);border-bottom:1px solid var(--line);cursor:default}
+.list .phead:hover{background:var(--sunk)}
+.prow .sb{height:14px}
+.prow .sb .o{background:var(--sunk)}
+.prow .split{display:flex;gap:10px;flex-wrap:wrap;font:500 12px/1.3 var(--f-mono);color:var(--muted);margin-top:5px}
+@media (max-width:760px){.list .phead{display:none}.prow{grid-template-columns:1fr 1fr;grid-template-areas:"occ occ" "bar bar" "p o"}.prow .occ{grid-area:occ}.prow .c-b{grid-area:bar}.prow .c-p{grid-area:p}.prow .c-o{grid-area:o}}
+.signals{display:grid;gap:10px}
+.signals li{font-size:14px;color:var(--ink2)}
+code{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:1px 4px;border-radius:3px}
+@media (prefers-reduced-motion:no-preference){.meter .bar i,.sb>*{transition:width .25s ease}}
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <div class="brand"><h1>Next Shift</h1><span>Ontario autoworker job match</span></div>
+    <p class="lede">For workers laid off at <b>Stellantis Brampton</b> and <b>GM CAMI Ingersoll</b>: which jobs within driving distance fit the skills you already have, what they pay, what you would need to learn, and where to train.</p>
+    <div class="plants" id="plantChips"></div>
+  </div>
+  <div class="stripe" aria-hidden="true"></div>
+</header>
+<nav class="tabs" aria-label="Sections"><div class="wrap">
+  <a href="#worker" data-tab="worker">Find my next job</a>
+  <a href="#planner" data-tab="planner">Re-employment plan</a>
+  <a href="#products" data-tab="products">New products</a>
+  <a href="#training" data-tab="training">Training and funding</a>
+  <a href="#method" data-tab="method">Method and data</a>
+</div></nav>
+
+<main><div class="wrap">
+
+<section id="worker">
+  <div class="layout">
+    <form class="rail" id="wForm" onsubmit="return false">
+      <label class="f" for="wPlant">My plant
+        <select id="wPlant"></select></label>
+      <label class="f" for="wOrigin">My job at the plant
+        <select id="wOrigin"></select>
+        <small>Or search any job title:</small>
+        <input type="search" id="wSearch" list="titleList" placeholder="e.g. forklift operator, millwright">
+        <datalist id="titleList"></datalist></label>
+      <label class="f" for="wWage">My hourly pay ($/hr)
+        <input type="number" id="wWage" min="15" max="150" step="0.5">
+        <small id="wWageNote"></small></label>
+      <label class="f" for="wCommute">Longest drive I'd make (rush hour)
+        <select id="wCommute"></select></label>
+      <div class="f"><span style="font-weight:600;font-size:14px">What matters most</span>
+        <div class="seg" id="wPriority" role="group" aria-label="What matters most"></div></div>
+      <label class="check" for="wShort"><input type="checkbox" id="wShort"> Only jobs I can start within a year</label>
+      <p class="note">Your choices stay on this device. Nothing is sent anywhere.</p>
+    </form>
+    <div style="min-width:0">
+      <h2 id="wTitle">Best next jobs</h2>
+      <p class="summary" id="wSummary"></p>
+      <div class="list" id="wList" role="list"></div>
+      <p class="fine" id="wFoot"></p>
+    </div>
+  </div>
+</section>
+
+<section id="planner" hidden>
+  <h2>Re-employment plan</h2>
+  <p class="sub">How many displaced workers local openings can absorb within a year, which occupations they go to, and where retraining money does the most good. Change the assumptions to test the plan.</p>
+  <div class="layout">
+    <form class="rail" onsubmit="return false">
+      <div class="f"><span style="font-weight:600;font-size:14px">Plant</span><div class="seg" id="pPlant" role="group" aria-label="Plant"></div></div>
+      <label class="f" for="pCapture">Share of local openings workers can win: <span class="mono" id="pCaptureV"></span>
+        <input type="range" id="pCapture" min="2" max="30" step="1"><small>Laid-off autoworkers compete with every other job seeker.</small></label>
+      <label class="f" for="pCommute">Longest commute (rush hour)
+        <select id="pCommute"></select></label>
+      <label class="f" for="pMatch">Minimum skill match: <span class="mono" id="pMatchV"></span>
+        <input type="range" id="pMatch" min="65" max="92" step="1"></label>
+      <label class="f" for="pWage">Minimum pay kept: <span class="mono" id="pWageV"></span>
+        <input type="range" id="pWage" min="40" max="100" step="5"></label>
+      <p class="note">Horizon: <span id="pHorizon"></span> months. Workforce mix by occupation is an estimate; replace it with the union's list.</p>
+    </form>
+    <div style="min-width:0">
+      <div id="pStatus"></div>
+      <div class="tiles" id="pTiles"></div>
+      <div class="panel"><h3>Who gets placed, by plant job</h3>
+        <div class="legend"><span><i style="background:var(--steel)"></i>Placed in a good-fit job</span><span><i style="background:var(--amber)"></i>Needs retraining or a wider search</span></div>
+        <div id="pStack"></div></div>
+      <div class="two">
+        <div class="panel"><h3>Where they go</h3><div class="scroll"><table class="t" id="pDest"></table></div></div>
+        <div class="panel"><h3>Where retraining pays off</h3><p class="fine" style="margin-top:0">Occupations with openings left over that workers not yet placed can reach with up to two years of college or trade training, at 80%+ of their pay.</p><div class="scroll"><table class="t" id="pTrain"></table></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="products" hidden>
+  <h2>New products for the plants</h2>
+  <p class="sub">If each plant were retooled for a new product, how much of that product's hourly workforce could the laid-off workers fill, and how fast? Each product's jobs come from how its industry is staffed; each worker moves into the product job that fits their skills best.</p>
+  <div class="layout">
+    <form class="rail" onsubmit="return false">
+      <div class="f"><span style="font-weight:600;font-size:14px">Plant</span><div class="seg" id="rPlant" role="group" aria-label="Plant"></div></div>
+      <label class="f" for="rHead">Hourly jobs the product creates: <span class="mono" id="rHeadV"></span>
+        <input type="range" id="rHead" min="20" max="150" step="5"><small>As a share of the laid-off workforce. Lower-volume products, like military vehicles, may need fewer people.</small></label>
+      <label class="f" for="rMonths">Counts as "ready soon": training up to <span class="mono" id="rMonthsV"></span>
+        <input type="range" id="rMonths" min="1" max="12" step="1"></label>
+      <label class="f" for="rMatch">Minimum skill match: <span class="mono" id="rMatchV"></span>
+        <input type="range" id="rMatch" min="65" max="92" step="1"></label>
+      <div class="f"><span style="font-weight:600;font-size:14px">Sort by</span><div class="seg" id="rSort" role="group" aria-label="Sort by"></div></div>
+      <p class="note">Workers left after the quick pass can retrain for up to <span id="rRetrain"></span> months (skill match 65+). Remaining jobs are hired from outside.</p>
+    </form>
+    <div style="min-width:0">
+      <div id="rStatus"></div>
+      <div class="legend"><span><i style="background:var(--steel)"></i>Laid-off workers, ready soon</span><span><i style="background:var(--amber)"></i>After retraining</span><span><i style="background:var(--sunk);border:1px solid var(--line)"></i>Hired from outside</span></div>
+      <div class="list" id="rList" role="list"></div>
+      <p class="fine" id="rFoot"></p>
+    </div>
+  </div>
+</section>
+
+<section id="training" hidden>
+  <h2>Training and funding</h2>
+  <p class="sub">Programs that lead into the occupations above, sorted by rush-hour drive from your plant. Check intake dates and fees with the college before applying.</p>
+  <div class="seg" id="tPlant" role="group" aria-label="Plant" style="margin-bottom:16px"></div>
+  <div class="two">
+    <div class="panel" style="grid-column:1/-1"><div class="scroll"><table class="t" id="tTable"></table></div></div>
+    <div class="panel prose" id="tFunding"></div>
+    <div class="panel prose" id="tHelp"></div>
+  </div>
+</section>
+
+<section id="method" hidden><div class="prose" id="mBody"></div></section>
+
+</div></main>
+
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (x, d=0) => x == null || !isFinite(x) ? "–" : Number(x).toLocaleString("en-CA", {minimumFractionDigits:d, maximumFractionDigits:d});
+const money = x => x == null || !isFinite(x) ? "–" : "$" + fmt(x, 2);
+const pct = x => x == null || !isFinite(x) ? "–" : fmt(100 * x) + "%";
+const BANDS = D.bands, C = D.cfg, PL = Object.keys(D.plants);
+const OCC = D.occ, IDX = Object.fromEntries(OCC.map((o, i) => [o.noc, i]));
+const PROF = D.profiles.map(r => r.map(v => v / 10));
+const DESC = D.descriptors;
+const GROUP = {skills: "Skill", abilities: "Ability", work_activities: "Work activity"};
+const PRIORITY = {
+  "Balanced": C.weights,
+  "Keep my pay": {skill: .35, demand: .15, wage: .40, training: .10},
+  "Start soon": {skill: .40, demand: .20, wage: .10, training: .30},
+  "Most openings": {skill: .35, demand: .45, wage: .10, training: .10},
+};
+
+/* ---------- engine (same formulas as atp/skills.py and atp/match.py) ---------- */
+function transfer(origin, targets) {
+  const o = PROF[IDX[origin]], om = o.reduce((a, b) => a + b, 0) / o.length;
+  const oc = o.map(v => v - om), on = Math.hypot(...oc);
+  return targets.map(t => {
+    const T = PROF[IDX[t]]; let sh = 0, tt = 0, dot = 0, tn = 0;
+    const tm = T.reduce((a, b) => a + b, 0) / T.length;
+    for (let j = 0; j < T.length; j++) {
+      sh += Math.max(0, T[j] - o[j]) * T[j]; tt += T[j] * T[j];
+      const c = T[j] - tm; dot += c * oc[j]; tn += c * c;
+    }
+    const readiness = 100 * (1 - sh / tt), cos = dot / (Math.sqrt(tn) * on + 1e-9);
+    const match = C.readiness_weight * readiness + (1 - C.readiness_weight) * 50 * (cos + 1);
+    return {noc: t, match, readiness};
+  });
+}
+function gaps(origin, target) {
+  const o = PROF[IDX[origin]], T = PROF[IDX[target]], g = [];
+  for (let j = 0; j < T.length; j++) {
+    const d = T[j] - o[j];
+    if (T[j] >= C.gap_min_target && d >= C.gap_min_diff) g.push({j, you: o[j], need: T[j], w: d * T[j]});
+  }
+  return g.sort((a, b) => b.w - a.w);
+}
+function nearbyPrograms(noc, plant) {
+  return D.programs.filter(p => p.target_nocs.includes(noc))
+    .sort((a, b) => (a["min_" + plant] ?? 1e9) - (b["min_" + plant] ?? 1e9));
+}
+function trainingMonths(target, origin, match, plant) {
+  const occ = OCC[IDX[target]], ot = +origin[1], tt = +target[1];
+  const sameField = origin[0] === target[0];
+  if (tt >= ot && (tt >= 4 || sameField) && match >= 85 && !occ.compulsory && !occ.licence)
+    return [1, "Ready now: short on-the-job or safety training"];
+  const near = nearbyPrograms(target, plant).filter(p => p["min_" + plant] == null || p["min_" + plant] <= C.training_max_min);
+  if (near.length) return [Math.min(...near.map(p => p.months)), "Shortest nearby program"];
+  return [C.teer_months[tt] ?? 12, "Typical for this skill level"];
+}
+function targetWage(noc, plant) {
+  const d = D.demand[plant][noc], o = OCC[IDX[noc]];
+  return (d && d[8] != null) ? d[8] : (o.wage[plant].median ?? o.wage.on.median);
+}
+function rank(plant, origin, wage, band, weights) {
+  const bi = BANDS.indexOf(band), dem = D.demand[plant];
+  const targets = Object.keys(dem).filter(n => n in IDX && dem[n][bi] > 0);
+  let rows = transfer(origin, targets).filter(r => r.match >= C.min_match);
+  rows.forEach(r => {
+    const d = dem[r.noc];
+    r.vac = d[bi]; r.posts = d[4 + bi]; r.wage = targetWage(r.noc, plant);
+    r.ratio = r.wage != null && wage ? r.wage / wage : null;
+    [r.months, r.basis] = trainingMonths(r.noc, origin, r.match, plant);
+  });
+  const vmax = Math.log1p(Math.max(1, ...rows.map(r => r.vac)));
+  rows.forEach(r => {
+    const s = Math.min(1, Math.max(0, (r.match - 50) / 50)), dm = Math.log1p(r.vac) / vmax;
+    const w = Math.min(1, Math.max(0, ((r.ratio ?? .8) - .5) / .7)), tr = 1 - Math.min(1, r.months / 48);
+    r.score = 100 * (weights.skill * s + weights.demand * dm + weights.wage * w + weights.training * tr);
+  });
+  return rows.sort((a, b) => b.score - a.score);
+}
+function defaultWage(origin, plant) {
+  const o = OCC[IDX[origin]];
+  return o.wage[plant].high ?? o.wage.on.high ?? o.wage.on.median ?? 25;
+}
+
+/* ---------- header ---------- */
+$("#plantChips").innerHTML = PL.map(k => `<span class="chip"><i></i>${esc(D.plants[k].short)}: ${fmt(D.plants[k].displaced)} workers idle</span>`).join("")
+  + `<span class="chip">${fmt(D.n_postings)} Ontario job postings, ${esc(D.window[0])} to ${esc(D.window[1])}</span>`;
+
+/* ---------- tabs ---------- */
+const TABS = ["worker", "planner", "products", "training", "method"];
+function show(tab) {
+  if (!TABS.includes(tab)) tab = "worker";
+  TABS.forEach(t => { $("#" + t).hidden = t !== tab; });
+  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+}
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+
+/* ---------- worker view ---------- */
+const W = {plant: PL[0], origin: "94200", wage: null, band: C.default_commute, priority: "Balanced", short: false, open: null};
+const mixNocs = Object.keys(D.mix).sort((a, b) => D.mix[b] - D.mix[a]);
+$("#wPlant").innerHTML = PL.map(k => `<option value="${k}">${esc(D.plants[k].name)}</option>`).join("");
+$("#wOrigin").innerHTML = `<optgroup label="Jobs at the plant">${mixNocs.map(n => `<option value="${n}">${esc(OCC[IDX[n]].name)}</option>`).join("")}</optgroup>`
+  + `<optgroup label="Any occupation">${OCC.filter(o => !mixNocs.includes(o.noc)).sort((a, b) => a.name.localeCompare(b.name)).map(o => `<option value="${o.noc}">${esc(o.name)}</option>`).join("")}</optgroup>`;
+const TITLE2NOC = {};
+OCC.forEach(o => [o.name, ...o.titles].forEach(t => { if (!(t in TITLE2NOC)) TITLE2NOC[t] = o.noc; }));
+$("#titleList").innerHTML = Object.keys(TITLE2NOC).sort().map(t => `<option value="${esc(t)}">`).join("");
+$("#wCommute").innerHTML = BANDS.map(b => `<option value="${b}">${b} minutes</option>`).join("");
+$("#wPriority").innerHTML = Object.keys(PRIORITY).map(p => `<button type="button" data-p="${esc(p)}">${esc(p)}</button>`).join("");
+
+function wSync() {
+  $("#wPlant").value = W.plant; $("#wOrigin").value = W.origin; $("#wCommute").value = W.band;
+  $("#wWage").value = W.wage.toFixed(2); $("#wShort").checked = W.short;
+  document.querySelectorAll("#wPriority button").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === W.priority));
+  $("#wWageNote").textContent = `Pre-filled from ESDC's high wage for this job in the ${D.plants[W.plant].short} region. Change it to your own rate.`;
+}
+function resetWage() { W.wage = defaultWage(W.origin, W.plant); }
+$("#wPlant").onchange = e => { W.plant = e.target.value; resetWage(); W.open = null; wRender(); };
+$("#wOrigin").onchange = e => { W.origin = e.target.value; resetWage(); W.open = null; $("#wSearch").value = ""; wRender(); };
+$("#wSearch").onchange = e => { const n = TITLE2NOC[e.target.value]; if (n) { W.origin = n; resetWage(); W.open = null; wRender(); } };
+$("#wWage").onchange = e => { const v = parseFloat(e.target.value); if (v > 0) W.wage = v; wRender(); };
+$("#wCommute").onchange = e => { W.band = +e.target.value; wRender(); };
+$("#wShort").onchange = e => { W.short = e.target.checked; wRender(); };
+$("#wPriority").onclick = e => { const b = e.target.closest("button"); if (b) { W.priority = b.dataset.p; wRender(); } };
+
+function ratioCell(r) {
+  if (r.ratio == null) return `<span class="flat">–</span>`;
+  const cls = r.ratio >= .97 ? "up" : r.ratio >= .8 ? "flat" : "down";
+  return `<span class="${cls}">${pct(r.ratio)} of yours</span>`;
+}
+function wRender() {
+  wSync();
+  const occ = OCC[IDX[W.origin]];
+  let rows = rank(W.plant, W.origin, W.wage, W.band, PRIORITY[W.priority]);
+  const all = rows.length;
+  if (W.short) rows = rows.filter(r => r.months <= 12);
+  rows = rows.filter(r => r.noc !== W.origin || D.demand[W.plant][r.noc]);
+  const top = rows.slice(0, 25);
+  $("#wTitle").textContent = "Best next jobs";
+  const totalVac = rows.reduce((a, r) => a + r.vac, 0);
+  $("#wSummary").innerHTML = `<span>From <b>${esc(occ.name)}</b> <span class="code">NOC ${occ.noc}</span>:</span><span><b class="mono">${fmt(all)}</b> occupations with openings within ${W.band} min of ${esc(D.plants[W.plant].short)}</span>`
+    + `<span><b class="mono">${fmt(totalVac)}</b> openings a month in them</span>`
+    + `<span><b class="mono">${fmt(rows.filter(r => r.match >= 80).length)}</b> are a strong skill fit (80+)</span>`;
+  if (!top.length) { $("#wList").innerHTML = `<div class="empty">No occupations with openings fit these filters. Try a longer drive or clear "Only jobs I can start within a year".</div>`; return; }
+  $("#wList").innerHTML = `<div class="head"><span>Occupation</span><span>Skill match</span><span>Openings / mo</span><span>Typical pay</span><span>Training</span><span style="text-align:right">Fit</span></div>`
+    + top.map(r => {
+      const o = OCC[IDX[r.noc]];
+      const pills = (r.basis.startsWith("Ready now") ? `<span class="pill go">Ready now</span>` : "")
+        + (o.compulsory ? `<span class="pill lic">Licensed trade</span>` : o.licence ? `<span class="pill lic">Licence needed</span>` : "")
+        + (r.months >= 24 ? `<span class="pill long">2+ years</span>` : "");
+      return `<div class="row" role="listitem" tabindex="0" data-noc="${r.noc}" aria-expanded="${W.open === r.noc}">
+        <div class="occ"><b>${esc(o.name)}</b><div class="meta"><span class="code">NOC ${r.noc} · TEER ${o.teer}</span>${pills}</div></div>
+        <div class="meter c-m"><span class="num">${fmt(r.match)}<small class="lbl">skill match</small></span><div class="bar"><i style="width:${Math.max(0, Math.min(100, r.match))}%"></i></div></div>
+        <div class="num c-o">${fmt(r.vac, r.vac < 10 ? 1 : 0)}<small>${fmt(r.posts)} postings in ${D.n_months} mo</small></div>
+        <div class="num c-p">${money(r.wage)}<small>${ratioCell(r)}</small></div>
+        <div class="num c-t">${r.basis.startsWith("Ready now") ? "Weeks" : r.months < 1 ? "Days" : fmt(r.months) + " mo"}<small>${esc(r.basis.replace(/:.*/, ""))}</small></div>
+        <div class="score">${fmt(r.score)}</div></div>` + (W.open === r.noc ? detail(r) : "");
+    }).join("");
+  $("#wFoot").textContent = `Fit = ${Object.entries(PRIORITY[W.priority]).map(([k, v]) => `${fmt(v * 100)}% ${k}`).join(", ")}. Openings are Job Bank vacancies first posted ${D.window[0]} to ${D.window[1]}, averaged per month, within a ${W.band}-minute rush-hour drive. Pay is the median posted wage within 90 minutes (ESDC regional median where no posting gives one).`;
+}
+function detail(r) {
+  const o = OCC[IDX[r.noc]], g = gaps(W.origin, r.noc).slice(0, 6), d = D.demand[W.plant][r.noc];
+  const progs = nearbyPrograms(r.noc, W.plant).slice(0, 4);
+  const posts = (D.samples[W.plant][r.noc] || []).filter(p => p[3] <= W.band).slice(0, 8);
+  const q = encodeURIComponent(o.name.split(",")[0]), loc = encodeURIComponent(D.plants[W.plant].short + ", ON");
+  const gapHtml = g.length ? `<div class="legend"><span><i style="background:var(--steel)"></i>You</span><span><i style="background:var(--amber)"></i>Job needs</span><span>Scale 0–5</span></div>`
+      + g.map(x => `<div class="gap"><span>${esc(DESC[x.j].name)} <span class="code">${GROUP[DESC[x.j].group]}</span></span><div class="gapbar" aria-label="You ${fmt(x.you, 1)}, needed ${fmt(x.need, 1)}"><span class="you" style="width:${x.you / 5 * 100}%"></span><span class="need" style="left:calc(${x.need / 5 * 100}% - 1px)"></span></div></div>`).join("")
+    : `<p class="note">No skill gaps of a full level or more. Your current skills cover what this job relies on.</p>`;
+  return `<div class="detail" role="region" aria-label="Details for ${esc(o.name)}">
+    <div><h4>Skills to build</h4>${gapHtml}
+      <h4 style="margin-top:18px">What employers ask</h4><ul class="plain">
+      ${d ? `<li><b class="mono">${pct(d[9])}</b> of nearby postings ask for no more than high school; <b class="mono">${pct(d[10])}</b> take under a year of experience.</li>` : ""}
+      ${o.req.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>
+    <div><h4>Training nearby</h4>${progs.length ? `<ul class="plain">${progs.map(p => `<li class="prog"><span><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.program)}</a><br><span class="fine">${esc(p.provider)} · ${esc(p.credential)}</span></span><span class="k">${p["min_" + W.plant] == null ? "many places" : fmt(p["min_" + W.plant]) + " min"}<br>${p.months < 1 ? "days" : fmt(p.months) + " mo"}</span></li>`).join("")}</ul>`
+      : `<p class="note">No listed program for this occupation. Ask an Employment Ontario centre about employer-based training.</p>`}
+      <h4 style="margin-top:18px">Recent postings within ${W.band} min</h4>
+      ${posts.length ? `<div class="scroll"><table class="t"><thead><tr><th>Job</th><th>Where</th><th class="r">$/hr</th><th class="r">Drive</th></tr></thead><tbody>${posts.map(p => `<tr><td>${esc(p[0])}<br><span class="fine">${esc(p[4])}${p[5] > 1 ? " · " + p[5] + " openings" : ""}</span></td><td>${esc(p[1])}</td><td class="r">${p[2] == null ? "–" : fmt(p[2], 2)}</td><td class="r">${fmt(p[3])} min</td></tr>`).join("")}</tbody></table></div>` : `<p class="note">No sample postings.</p>`}
+      <p class="more"><a href="https://www.jobbank.gc.ca/jobsearch/jobsearch?searchstring=${q}&locationstring=${loc}" target="_blank" rel="noopener">Search current openings on Job Bank</a></p></div></div>`;
+}
+$("#wList").addEventListener("click", e => { const row = e.target.closest(".row"); if (!row || e.target.closest("a")) return; W.open = W.open === row.dataset.noc ? null : row.dataset.noc; wRender(); });
+$("#wList").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("row")) { e.preventDefault(); e.target.click(); } });
+resetWage(); wRender();
+
+/* ---------- planner ---------- */
+const P = {plant: PL[0], capture: Math.round(C.capture * 100), band: C.planner_commute, minMatch: C.planner_min_match, minWage: Math.round(C.planner_min_wage * 100)};
+$("#pPlant").innerHTML = PL.map(k => `<button type="button" data-k="${k}">${esc(D.plants[k].short)}</button>`).join("");
+$("#tPlant").innerHTML = $("#pPlant").innerHTML;
+$("#pCommute").innerHTML = BANDS.map(b => `<option value="${b}">${b} minutes</option>`).join("");
+$("#pHorizon").textContent = C.planning_months;
+$("#pPlant").onclick = e => { const b = e.target.closest("button"); if (b) { P.plant = b.dataset.k; pRender(); } };
+$("#pCapture").oninput = e => { P.capture = +e.target.value; pRender(); };
+$("#pCommute").onchange = e => { P.band = +e.target.value; pRender(); };
+$("#pMatch").oninput = e => { P.minMatch = +e.target.value; pRender(); };
+$("#pWage").oninput = e => { P.minWage = +e.target.value; pRender(); };
+
+function absorb() {
+  const plant = P.plant, p = D.plants[plant], bi = BANDS.indexOf(P.band);
+  const cap = {}, opts = {}, workers = {};
+  for (const [o, s] of Object.entries(D.mix)) {
+    workers[o] = Math.round(s * p.displaced);
+    const rows = rank(plant, o, defaultWage(o, plant), P.band, C.weights)
+      .filter(r => r.match >= P.minMatch && (r.ratio ?? 0) >= P.minWage / 100 && r.vac > 0 && r.months <= C.planner_max_train);
+    opts[o] = rows;
+    rows.forEach(r => { cap[r.noc] = r.vac * C.planning_months * P.capture / 100; });
+  }
+  const order = Object.keys(workers).sort((a, b) => opts[a].length - opts[b].length);
+  const placed = [], left = {};
+  for (const o of order) {
+    let n = workers[o];
+    for (const r of opts[o]) {
+      if (n <= 0) break;
+      const take = Math.min(n, Math.floor(cap[r.noc]));
+      if (take <= 0) continue;
+      cap[r.noc] -= take; n -= take;
+      placed.push({origin: o, noc: r.noc, n: take, ratio: r.ratio, wage: r.wage, vac: r.vac, match: r.match});
+    }
+    left[o] = n;
+  }
+  return {workers, placed, left, cap};
+}
+function pRender() {
+  const p = D.plants[P.plant];
+  document.querySelectorAll("#pPlant button").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === P.plant));
+  $("#pCapture").value = P.capture; $("#pCaptureV").textContent = P.capture + "%";
+  $("#pCommute").value = P.band; $("#pMatch").value = P.minMatch; $("#pMatchV").textContent = P.minMatch;
+  $("#pWage").value = P.minWage; $("#pWageV").textContent = P.minWage + "%";
+  const a = absorb(), total = Object.values(a.workers).reduce((x, y) => x + y, 0);
+  const placed = a.placed.reduce((x, r) => x + r.n, 0), notPlaced = total - placed;
+  const keep = placed ? a.placed.reduce((x, r) => x + r.n * Math.min(r.ratio, 1.5), 0) / placed : null;
+  $("#pStatus").innerHTML = `<div class="status"><b>${esc(p.name)} · ${esc(p.union)}</b><span class="fine">${esc(p.status)}</span></div>`;
+  $("#pTiles").innerHTML = [
+    ["Displaced workers", fmt(total), "Hourly workers idled"],
+    ["Placed within " + C.planning_months + " mo", fmt(placed), pct(placed / total) + " in good-fit local jobs"],
+    ["Need retraining or wider search", fmt(notPlaced), pct(notPlaced / total) + " of the workforce"],
+    ["Pay kept by those placed", keep == null ? "–" : pct(keep), "Posted pay vs plant pay, averaged"],
+  ].map(([k, v, n]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="n">${n}</div></div>`).join("");
+  const max = Math.max(...Object.values(a.workers));
+  $("#pStack").innerHTML = Object.keys(a.workers).sort((x, y) => a.workers[y] - a.workers[x]).map(o => {
+    const w = a.workers[o], u = a.left[o], pl = w - u;
+    return `<div class="stack"><span>${esc(OCC[IDX[o]].name)}</span><div class="sb" style="width:${Math.max(6, w / max * 100)}%" aria-label="${pl} placed, ${u} not placed"><span class="p" style="width:${pl / w * 100}%"></span><span class="u" style="width:${u / w * 100}%"></span></div><span class="mono" style="text-align:right">${fmt(pl)} / ${fmt(w)}</span></div>`;
+  }).join("");
+  const dest = {};
+  a.placed.forEach(r => { const d = dest[r.noc] ||= {n: 0, vac: r.vac, wage: r.wage, from: new Set()}; d.n += r.n; d.from.add(r.origin); });
+  $("#pDest").innerHTML = `<thead><tr><th>Occupation</th><th class="r">Workers</th><th class="r">Openings/mo</th><th class="r">Pay</th></tr></thead><tbody>`
+    + Object.entries(dest).sort((x, y) => y[1].n - x[1].n).slice(0, 14).map(([n, d]) => `<tr><td>${esc(OCC[IDX[n]].name)}</td><td class="r">${fmt(d.n)}</td><td class="r">${fmt(d.vac)}</td><td class="r">${money(d.wage)}</td></tr>`).join("")
+    + (Object.keys(dest).length ? "" : `<tr><td colspan="4">No placements under these assumptions.</td></tr>`) + `</tbody>`;
+  // Retraining: openings left after placement that the unplaced can reach with up to two years of training
+  // (match >= 70, college or trade level: TEER 2-3), paying >= 80% of their wage.
+  const need = {};
+  for (const [o, n] of Object.entries(a.left)) {
+    if (n <= 0) continue;
+    rank(P.plant, o, defaultWage(o, P.plant), P.band, C.weights)
+      .filter(r => r.match >= 70 && r.months <= 24 && +r.noc[1] >= 2 && (r.ratio ?? 0) >= .8
+        && (a.cap[r.noc] ?? r.vac * C.planning_months * P.capture / 100) >= 1)
+      .forEach(r => { const x = need[r.noc] ||= {workers: 0, room: a.cap[r.noc] ?? r.vac * C.planning_months * P.capture / 100, wage: r.wage, months: r.months}; x.workers += n; x.months = Math.min(x.months, r.months); });
+  }
+  const tr = Object.entries(need).map(([k, x]) => ({noc: k, seats: Math.min(x.workers, Math.floor(x.room)), ...x}))
+    .filter(x => x.months > 1).sort((x, y) => y.seats * y.wage - x.seats * x.wage).slice(0, 10);
+  $("#pTrain").innerHTML = `<thead><tr><th>Train for</th><th class="r">Seats</th><th class="r">Pay</th><th class="r">Months</th></tr></thead><tbody>`
+    + (tr.length ? tr.map(x => `<tr><td>${esc(OCC[IDX[x.noc]].name)}<br><span class="fine">${esc((nearbyPrograms(x.noc, P.plant)[0] || {}).program || "No listed program: ask Employment Ontario")}</span></td><td class="r">${fmt(x.seats)}</td><td class="r">${money(x.wage)}</td><td class="r">${fmt(x.months)}</td></tr>`).join("") : `<tr><td colspan="4">Everyone is placed under these assumptions.</td></tr>`) + `</tbody>`;
+}
+pRender();
+
+/* ---------- new products (same rules as atp/repurpose.py) ---------- */
+const RPC = D.rp;
+const R = {plant: PL[0], head: Math.round(RPC.headcount * 100), months: RPC.quick_months, minMatch: RPC.quick_match, sort: "Ready soon", open: null};
+const RSORT = {
+  "Ready soon": (a, b) => b.quick - a.quick || b.retrain - a.retrain,
+  "Pay": (a, b) => b.pay - a.pay,
+  "Fewest outside hires": (a, b) => (a.outside + a.salaried) - (b.outside + b.salaried),
+};
+$("#rPlant").innerHTML = $("#pPlant").innerHTML;
+$("#rSort").innerHTML = Object.keys(RSORT).map(s => `<button type="button" data-s="${esc(s)}">${esc(s)}</button>`).join("");
+$("#rRetrain").textContent = RPC.retrain_months;
+$("#rPlant").onclick = e => { const b = e.target.closest("button"); if (b) { R.plant = b.dataset.k; rRender(); } };
+$("#rSort").onclick = e => { const b = e.target.closest("button"); if (b) { R.sort = b.dataset.s; rRender(); } };
+$("#rHead").oninput = e => { R.head = +e.target.value; rRender(); };
+$("#rMonths").oninput = e => { R.months = +e.target.value; rRender(); };
+$("#rMatch").oninput = e => { R.minMatch = +e.target.value; rRender(); };
+const medWage = (n, plant) => { const o = OCC[IDX[n]]; return o.wage[plant].median ?? o.wage.on.median; };
+
+function rpAssign(supply, need, opts) {
+  const out = [];
+  for (const role of Object.keys(need)) {   // workers first keep their own occupation where the product has it
+    const own = (opts[role] || []).find(x => x.o === role);
+    const take = own ? Math.min(supply[role] ?? 0, need[role]) : 0;
+    if (take > 0) { supply[role] -= take; need[role] -= take; out.push({o: role, role, n: take, match: own.match, months: own.months}); }
+  }
+  for (const role of Object.keys(need).sort((a, b) => (opts[a] || []).length - (opts[b] || []).length)) {
+    for (const x of opts[role] || []) {
+      const take = Math.min(supply[x.o], need[role]);
+      if (take <= 0) continue;
+      supply[x.o] -= take; need[role] -= take;
+      out.push({o: x.o, role, n: take, match: x.match, months: x.months});
+    }
+  }
+  return out;
+}
+function rpFit(plant, prod) {
+  const p = D.plants[plant], jobs = R.head / 100 * p.displaced, roles = Object.keys(prod.roles);
+  const supply = Object.fromEntries(Object.entries(D.mix).map(([o, s]) => [o, s * p.displaced]));
+  const need = Object.fromEntries(roles.map(r => [r, prod.roles[r] * jobs]));
+  const pairs = [];
+  for (const o of Object.keys(D.mix))
+    transfer(o, roles).forEach(t => pairs.push({o, role: t.noc, match: t.match, months: trainingMonths(t.noc, o, t.match, plant)[0]}));
+  const options = (minMatch, maxMonths) => {
+    const d = {};
+    pairs.filter(x => x.match >= minMatch && x.months <= maxMonths).forEach(x => (d[x.role] ||= []).push(x));
+    Object.values(d).forEach(v => v.sort((a, b) => b.match - a.match || a.months - b.months));
+    return d;
+  };
+  const quick = rpAssign(supply, need, options(R.minMatch, R.months));
+  const retrain = rpAssign(supply, need, options(RPC.retrain_match, RPC.retrain_months));
+  const sum = a => a.reduce((x, f) => x + f.n, 0);
+  const avg = sh => { let s = 0, w = 0; for (const [n, v] of Object.entries(sh)) { const x = medWage(n, plant); if (x != null) { s += v * x; w += v; } } return s / w; };
+  const gapW = {};
+  [...quick, ...retrain].forEach(f => gaps(f.o, f.role).forEach(g => { gapW[g.j] = (gapW[g.j] || 0) + f.n * g.w; }));
+  const q = sum(quick), rt = sum(retrain);
+  return {prod, jobs, quick: q / jobs, retrain: rt / jobs, outside: (jobs - q - rt) / jobs, nq: q, nr: rt,
+    flows: [...quick.map(f => ({...f, stage: "quick"})), ...retrain.map(f => ({...f, stage: "retrain"}))], need,
+    pay: avg(prod.roles) / avg(D.mix), salaried: prod.salaried,
+    gaps: Object.entries(gapW).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([j, w]) => ({j: +j, per: w / jobs}))};
+}
+function rRender() {
+  const p = D.plants[R.plant];
+  document.querySelectorAll("#rPlant button").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === R.plant));
+  document.querySelectorAll("#rSort button").forEach(b => b.setAttribute("aria-pressed", b.dataset.s === R.sort));
+  $("#rHead").value = R.head; $("#rHeadV").textContent = R.head + "% · " + fmt(R.head / 100 * p.displaced) + " jobs";
+  $("#rMonths").value = R.months; $("#rMonthsV").textContent = R.months + (R.months === 1 ? " month" : " months");
+  $("#rMatch").value = R.minMatch; $("#rMatchV").textContent = R.minMatch;
+  $("#rStatus").innerHTML = `<div class="status"><b>${esc(p.name)} · ${fmt(p.displaced)} workers laid off</b><span class="fine">${esc(p.status)}</span></div>`;
+  const res = D.products.map(pr => rpFit(R.plant, pr)).sort(RSORT[R.sort]);
+  $("#rList").innerHTML = `<div class="prow phead"><span>Product</span><span>Who fills its hourly jobs</span><span>Typical pay vs auto</span><span>Salaried hires per 100</span></div>`
+    + res.map(x => {
+      const pc = Math.min(1.5, x.pay), cls = pc >= .97 ? "up" : pc >= .85 ? "flat" : "down";
+      return `<div class="row prow" role="listitem" tabindex="0" data-id="${x.prod.id}" aria-expanded="${R.open === x.prod.id}">
+        <div class="occ"><b>${esc(x.prod.name)}</b><div class="meta">${x.prod.signals.length ? `<span class="code">${x.prod.signals.length} news item${x.prod.signals.length > 1 ? "s" : ""}</span>` : `<span class="code">No current Canadian anchor found</span>`}</div></div>
+        <div class="c-b"><div class="sb" aria-label="${pct(x.quick)} ready soon, ${pct(x.retrain)} after retraining, ${pct(x.outside)} outside"><span class="p" style="width:${x.quick * 100}%"></span><span class="u" style="width:${x.retrain * 100}%"></span><span class="o" style="width:${x.outside * 100}%"></span></div>
+          <div class="split"><span><b class="mono" style="color:var(--ink)">${pct(x.quick)}</b> ready soon</span><span>${pct(x.retrain)} retrain</span><span>${pct(x.outside)} outside</span></div></div>
+        <div class="num c-p"><span class="${cls}">${pct(x.pay)}</span><small>pay vs auto jobs</small></div>
+        <div class="num c-o">${fmt(x.salaried)}<small>salaried hires per 100</small></div></div>` + (R.open === x.prod.id ? rDetail(x) : "");
+    }).join("");
+  $("#rFoot").textContent = `Hourly jobs use US industry staffing patterns (BLS, May 2025) mapped to Canadian occupations. "Ready soon" means skill match ${R.minMatch}+ and up to ${R.months} months of training under the worker view's rules. Pay compares regional ESDC median wages for the product's jobs with those for the plant's jobs, not company pay scales.`;
+}
+function rDetail(x) {
+  // NOC keys look numeric, so JS orders them by code; re-sort by share.
+  const roles = Object.entries(x.prod.roles).sort((a, b) => b[1] - a[1]).filter(([, s]) => s * x.jobs >= 0.5).slice(0, 12);
+  const from = {};
+  x.flows.forEach(f => { const d = from[f.role] ||= {q: 0, r: 0, src: {}, months: 0}; d[f.stage === "quick" ? "q" : "r"] += f.n; d.src[f.o] = (d.src[f.o] || 0) + f.n; if (f.stage === "retrain") d.months = Math.max(d.months, f.months); });
+  const name = n => OCC[IDX[n]].name;
+  const rows = roles.map(([n, s]) => {
+    const d = from[n] || {q: 0, r: 0, src: {}, months: 0}, jobs = s * x.jobs, out = Math.max(0, jobs - d.q - d.r);
+    const src = Object.entries(d.src).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([o]) => esc(name(o))).join("; ");
+    return `<tr><td>${esc(name(n))}<br><span class="fine">${src ? "From: " + src : "No laid-off worker fits"}</span></td><td class="r">${fmt(jobs)}</td><td class="r">${fmt(d.q)}</td><td class="r">${fmt(d.r)}${d.r >= .5 ? `<br><span class="fine">${fmt(d.months)} mo</span>` : ""}</td><td class="r">${fmt(out)}</td></tr>`;
+  }).join("");
+  const g = x.gaps.length ? `<ul class="plain">${x.gaps.map(g => `<li>${esc(DESC[g.j].name)} <span class="code">${GROUP[DESC[g.j].group]}</span></li>`).join("")}</ul>`
+    : `<p class="note">No skill gaps of a full level or more among the workers who move.</p>`;
+  return `<div class="detail" role="region" aria-label="Details for ${esc(x.prod.name)}">
+    <div style="grid-column:1/-1;min-width:0"><h4>Who builds it: ${fmt(x.jobs)} hourly jobs</h4><div class="scroll"><table class="t"><thead><tr><th>Job</th><th class="r">Jobs</th><th class="r">Ready soon</th><th class="r">Retrain</th><th class="r">Outside</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="fine">Largest ${roles.length} hourly jobs shown. Plus about ${fmt(x.salaried / 100 * x.jobs)} salaried staff (engineering, management, office), hired or transferred separately.</p></div>
+    <div><h4>Skills the workforce would need to build</h4>${g}
+      <h4 style="margin-top:18px">What carries over from the plant</h4><p style="margin-top:0;font-size:14px;color:var(--ink2)">${esc(x.prod.carries)}</p>
+    </div><div><h4>In the news</h4>${x.prod.signals.length ? `<ul class="plain signals">${x.prod.signals.map(([t, u]) => `<li>${esc(t)} <a href="${esc(u)}" target="_blank" rel="noopener">Source</a></li>`).join("")}</ul>` : `<p class="note">No current Ontario investment or procurement found for this product in this review.</p>`}
+      <h4 style="margin-top:18px">Staffing basis</h4><p class="fine" style="margin-top:0">${esc(x.prod.proxy)}.</p></div></div>`;
+}
+$("#rList").addEventListener("click", e => { const row = e.target.closest(".row"); if (!row || e.target.closest("a")) return; R.open = R.open === row.dataset.id ? null : row.dataset.id; rRender(); });
+$("#rList").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("row")) { e.preventDefault(); e.target.click(); } });
+rRender();
+
+/* ---------- training ---------- */
+let TP = PL[0];
+$("#tPlant").onclick = e => { const b = e.target.closest("button"); if (b) { TP = b.dataset.k; tRender(); } };
+function tRender() {
+  document.querySelectorAll("#tPlant button").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === TP));
+  const rows = [...D.programs].sort((a, b) => (a["min_" + TP] ?? 1e9) - (b["min_" + TP] ?? 1e9));
+  $("#tTable").innerHTML = `<thead><tr><th>Program</th><th>Leads to</th><th>Length</th><th class="r">Drive</th><th>Cost</th></tr></thead><tbody>`
+    + rows.map(p => `<tr><td><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.program)}</a><br><span class="fine">${esc(p.provider)} · ${esc(p.campus)}</span></td><td>${p.target_nocs.map(n => esc(OCC[IDX[n]]?.name ?? n)).join("<br>")}</td><td>${esc(p.credential)}<br><span class="fine">${esc(p.pathway)}</span></td><td class="r">${p["min_" + TP] == null ? "many" : fmt(p["min_" + TP]) + " min"}</td><td><span class="fine">${esc(p.cost_note)}</span></td></tr>`).join("") + `</tbody>`;
+}
+tRender();
+const B = C.bjo;
+$("#tFunding").innerHTML = `<h3>Paying for it</h3>
+  <p><b>Better Jobs Ontario</b> pays tuition, books, transportation and a living allowance of up to $${fmt(B.living_allowance_week)} a week for laid-off workers training for in-demand jobs: up to $${fmt(B.max_short)} for programs of a year or less and up to $${fmt(B.max_long)} for longer ones. Apply through an Employment Ontario centre. <a href="${B.url}" target="_blank" rel="noopener">Program page</a></p>
+  <p><b>Pre-apprenticeship programs</b> are free (tuition, tools and safety gear) and run up to 52 weeks with a work placement. <a href="https://www.ontario.ca/page/pre-apprenticeship-training" target="_blank" rel="noopener">Find a program</a></p>
+  <p><b>Apprenticeships</b> pay a wage while you train. Plant skilled-trades experience can count toward the hours needed for a certificate of qualification.</p>`;
+$("#tHelp").innerHTML = `<h3>Getting help</h3>
+  <p><b>Employment Ontario</b> centres handle Better Jobs Ontario applications, job search help and referrals. <a href="https://www.ontario.ca/page/employment-ontario" target="_blank" rel="noopener">Find a centre</a></p>
+  <p><b>Union action centres:</b> Unifor runs a provincially funded action centre in Brampton for laid-off Stellantis workers. CAMI members should ask Unifor Local 88.</p>
+  <p><b>Federal support:</b> Employment Insurance, and Job Bank for job alerts. <a href="https://www.jobbank.gc.ca/home" target="_blank" rel="noopener">Job Bank</a></p>`;
+
+/* ---------- method ---------- */
+$("#mBody").innerHTML = `<h2>Method and data</h2>
+<p>Next Shift ranks every Ontario occupation a displaced worker could move into. It uses four public datasets, a road network and a training list, and it runs entirely in this page.</p>
+<h3>Data</h3><ul>
+<li><b>Job openings:</b> Employment and Social Development Canada (ESDC), Job Bank open data, every Ontario posting first posted ${esc(D.window[0])} to ${esc(D.window[1])}. That is ${fmt(D.n_postings)} postings after removing same-day duplicates, ${pct(D.n_located / D.n_postings)} of them located by postal code or town. Postings include ones Job Bank collects from other job boards; private boards and large employers' own sites are only partly covered, so treat counts as a floor.</li>
+<li><b>Skills:</b> ESDC's Occupational and Skills Information System (OaSIS 2022). For each of 516 occupations (NOC 2021 unit groups) it rates ${DESC.length} descriptors from 0 to 5: 33 skills, 49 abilities and 40 work activities.</li>
+<li><b>Pay:</b> ESDC 2025 wages by occupation and economic region, plus wages stated in the postings.</li>
+<li><b>Requirements:</b> OaSIS employment requirements, including whether a trade certificate is compulsory in Ontario.</li>
+<li><b>Drive times:</b> Statistics Canada 2021 Road Network File (shortest-time paths from each plant at speeds set by road class), times a rush-hour factor of ${C.peak.brampton} for Brampton and ${C.peak.cami} for Ingersoll. Postal codes are placed at their forward sortation area (FSA, the first three characters) using the 2021 boundary file. Towns are located with the Natural Resources Canada place-names service.</li>
+<li><b>Training:</b> ${D.programs.length} programs from Sheridan, Humber, Conestoga and Fanshawe, plus provincial programs. Every link was checked when this page was built (${esc(D.generated)}).</li></ul>
+<h3>Skill match</h3>
+<p>For a worker in occupation <i>o</i> and a target job <i>t</i>, with ratings <i>o<sub>d</sub></i> and <i>t<sub>d</sub></i> on each descriptor:</p>
+<ul><li><b>Readiness</b> = 100 × (1 − Σ max(0, t<sub>d</sub> − o<sub>d</sub>) · t<sub>d</sub> / Σ t<sub>d</sub>²). This measures how much of what the job relies on the worker already has.</li>
+<li><b>Relevance</b> = 50 × (1 + correlation of the two profiles). This measures whether the job uses the same kind of skills. Without it, every less demanding job would look like a perfect fit.</li>
+<li><b>Skill match</b> = ${C.readiness_weight} × readiness + ${(1 - C.readiness_weight).toFixed(1)} × relevance. Gaps are the descriptors where the job needs ${C.gap_min_target}+ and the worker is ${C.gap_min_diff}+ level short.</li></ul>
+<h3>Ranking</h3>
+<p>Fit blends skill match, openings within the commute (on a log scale), pay relative to yours, and training time. The weights depend on "What matters most". Training time is a few weeks when the job is at or below your skill level (TEER), your match is 85+ and no licence is needed. Otherwise it is the shortest nearby listed program, or a typical length for the job's TEER.</p>
+<h3>Re-employment plan</h3>
+<p>Workers are spread across plant occupations using an <b>estimated workforce mix</b>, because no public table gives an Ontario assembly plant's occupation breakdown. The mix is about 70% assemblers, 13% skilled trades, 7% material handlers, plus painters, supervisors and technicians. The plan then gives each destination occupation room for a share of its openings over ${C.planning_months} months. Occupations with the fewest good options are placed first, each into its best-ranked destination. Workers not placed are the retraining and outreach target.</p>
+<h3>New products</h3>
+<p>Each candidate product's hourly workforce comes from how its closest industry is staffed in the US Bureau of Labor Statistics' Occupational Employment and Wage Statistics (May 2025, national industry tables). No comparable Canadian table exists. US occupations are mapped by hand to NOC 2021 using OaSIS titles and lead statements. Managers, engineers and office staff are counted separately as salaried hires. The plant's laid-off workers are then matched into the product's jobs with the same skill-match and training rules as the worker view. Jobs with the fewest eligible workers are filled first, each from its best-matching plant job. A first pass covers short training, a second covers up to ${RPC.retrain_months} months of retraining, and anything left is an outside hire. This measures workforce fit only. Whether a product is viable also depends on buyers, investment and retooling, which the market signals only begin to show.</p>
+<h3>Limits</h3><ul>
+<li>Postings are not hires. Job Bank under-covers some employers, and a share of postings are re-posts.</li>
+<li>OaSIS rates occupations, not people. A worker's own certificates, seniority and other skills can change their fit a lot, so treat the list as a starting point for a conversation with a counsellor.</li>
+<li>Drive times assume a car. Transit commutes will be longer.</li>
+<li>The plant workforce mix and the share of openings workers can win are assumptions. Union seniority lists and placement outcomes would replace them.</li></ul>
+<p class="fine">Independent analysis built on public data; not produced by or affiliated with Stellantis, General Motors, Unifor, or any government.</p>`;
+</script>
