@@ -2,6 +2,7 @@
 
     python run_all.py              # uses cached postings and drive times when present
     python run_all.py --rebuild    # re-reads the Job Bank files and rebuilds the road graph
+    python run_all.py --report     # only redraws the six report dashboards from outputs/
 """
 import argparse
 import json
@@ -14,7 +15,11 @@ from atp import config as C
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rebuild", action="store_true")
+    ap.add_argument("--report", action="store_true")
     a = ap.parse_args()
+    if a.report:
+        from atp import report
+        return print("->", report.build()[0].parent)
     if a.rebuild:
         for f in ("jobs_on.pkl", "drive_nodes.pkl"):
             (C.CACHE / f).unlink(missing_ok=True)
@@ -70,6 +75,8 @@ def main():
     (C.OUT / "summary.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
     app.build(r)
+    from atp import report
+    report.build()
 
 
 if __name__ == "__main__":

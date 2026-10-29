@@ -5,3 +5,4 @@ geopandas>=1.2
 pyogrio>=0.13
 shapely>=2.2
 pyproj>=3.8
+matplotlib>=3.9

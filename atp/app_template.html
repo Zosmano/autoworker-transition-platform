@@ -37,6 +37,8 @@ header.band .wrap{padding-block:28px 22px;display:grid;gap:14px}
 .stripe{height:10px;background:repeating-linear-gradient(-45deg,var(--amber) 0 14px,var(--band) 14px 28px)}
 .plants{display:flex;gap:10px;flex-wrap:wrap}
 .chip{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.18);border-radius:4px;padding:5px 10px;font:500 13px/1.2 var(--f-mono);color:var(--band-ink)}
+.byline{margin:0;font:500 12px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--band-muted)}
+.byline b{color:var(--band-ink);font-weight:500}
 .chip i{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block}
 nav.tabs{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
@@ -147,6 +149,8 @@ a{color:var(--steel)}
 @media (max-width:760px){.list .phead{display:none}.prow{grid-template-columns:1fr 1fr;grid-template-areas:"occ occ" "bar bar" "p o"}.prow .occ{grid-area:occ}.prow .c-b{grid-area:bar}.prow .c-p{grid-area:p}.prow .c-o{grid-area:o}}
 .signals{display:grid;gap:10px}
 .signals li{font-size:14px;color:var(--ink2)}
+footer.foot{border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer.foot .wrap{padding-block:16px 32px}
 code{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:1px 4px;border-radius:3px}
 @media (prefers-reduced-motion:no-preference){.meter .bar i,.sb>*{transition:width .25s ease}}
 </style>
@@ -156,6 +160,7 @@ code{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:1px
     <div class="brand"><h1>Next Shift</h1><span>Ontario autoworker job match</span></div>
     <p class="lede">For workers laid off at <b>Stellantis Brampton</b> and <b>GM CAMI Ingersoll</b>: which jobs within driving distance fit the skills you already have, what they pay, what you would need to learn, and where to train.</p>
     <div class="plants" id="plantChips"></div>
+    <p class="byline">Analysis and design by <b>Osman Zakaria, PMP</b></p>
   </div>
   <div class="stripe" aria-hidden="true"></div>
 </header>
@@ -266,6 +271,7 @@ code{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:1px
 <section id="method" hidden><div class="prose" id="mBody"></div></section>
 
 </div></main>
+<footer class="foot"><div class="wrap">© 2026 Osman Zakaria, PMP. Independent analysis of public data; not produced by or affiliated with Stellantis, General Motors, Unifor, or any government.</div></footer>
 
 <script>
 const D = /*__DATA__*/null;
