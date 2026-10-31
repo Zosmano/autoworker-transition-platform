@@ -26,6 +26,8 @@ Independent analysis built on public data. Not produced by or affiliated with St
 2. For each, how much of its hourly workforce the laid-off workers could fill with short training, how many need longer retraining (and into which jobs), and how many must be hired from outside.
 3. Shows typical pay against auto jobs, salaried hires needed, the skills to build, what plant equipment carries over, and dated news on demand for each product in Canada.
 
+**For anyone who wants the story in a minute** (the "Story films" tab): three short animated films, each in three acts (the layoff, the search, the next shift), with synthesized sound and a narrator: Brampton's 2,759 workers and the 38,537 jobs within a rush-hour hour, Ingersoll as the harder case, and what a new product line would take. In the live app they can be saved as video. The dashboard itself moves too: panels rise in, figures count up and bars draw themselves, unless the viewer's system asks for reduced motion.
+
 ## Results (default assumptions)
 
 | | Brampton | Ingersoll |
