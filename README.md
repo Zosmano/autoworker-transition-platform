@@ -69,7 +69,7 @@ These are model estimates. See **Limits**.
 
 Find a worker's next job, plan re-employment for both plants, and test which new products each workforce could build, all in the browser with nothing to install.
 
-[![Live app](https://img.shields.io/badge/Live_app-E5A21A?style=for-the-badge)](https://claude.ai/artifact/TosuEsDPFk3BEKgXYeCTBy)
+[![Live app](https://img.shields.io/badge/Live_app-E5A21A?style=for-the-badge)](https://zosmano.github.io/next-shift/)
 [![Python pipeline](https://img.shields.io/badge/Python_pipeline-1E4D74?style=for-the-badge&logo=python&logoColor=white)](#run-it)
 [![6 dashboards](https://img.shields.io/badge/6_dashboards-152A3D?style=for-the-badge)](#dashboards)
 
