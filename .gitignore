@@ -11,3 +11,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# The published page, built by run_all.py --site (deployed by GitHub Actions)
+site/

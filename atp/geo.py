@@ -32,6 +32,8 @@ def fsa_centroids():
     path = C.CACHE / "fsa_centroids_on.csv"
     if path.exists():
         return pd.read_csv(path, dtype={"fsa": str})
+    if not C.FSA_BOUNDARY_ZIP.exists() and (C.DERIVED / path.name).exists():
+        return pd.read_csv(C.DERIVED / path.name, dtype={"fsa": str})
     import zipfile
     import geopandas as gpd
     shp = next(n for n in zipfile.ZipFile(C.FSA_BOUNDARY_ZIP).namelist() if n.endswith(".shp"))
@@ -59,7 +61,8 @@ def _lookup_place(name):
 def places(names):
     """Geocode Ontario place names (cached). Returns {name: (lat, lon, feature) or None}."""
     path = C.CACHE / "geonames_on.json"
-    cache = json.loads(path.read_text()) if path.exists() else {}
+    seed = C.DERIVED / path.name
+    cache = json.loads(path.read_text()) if path.exists() else json.loads(seed.read_text()) if seed.exists() else {}
     todo = sorted({n for n in names if isinstance(n, str) and n not in cache})
     if todo:
         with ThreadPoolExecutor(6) as ex:
@@ -80,7 +83,8 @@ def _safe(f, *a):
 def addresses(addrs):
     """Geocode street addresses with NRCan's geolocation service (cached). {address: (lat, lon) or None}."""
     path = C.CACHE / "addresses.json"
-    cache = json.loads(path.read_text()) if path.exists() else {}
+    seed = C.DERIVED / path.name
+    cache = json.loads(path.read_text()) if path.exists() else json.loads(seed.read_text()) if seed.exists() else {}
     for a in addrs:
         if a in cache:
             continue

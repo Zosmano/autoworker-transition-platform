@@ -4,6 +4,8 @@ About 2,760 hourly workers at **Stellantis Brampton Assembly** (idle since Febru
 
 Independent analysis built on public data. Not produced by or affiliated with Stellantis, General Motors, Unifor, or any government.
 
+**Live tool: [zosmano.github.io/autoworker-transition-platform](https://zosmano.github.io/autoworker-transition-platform/).** On the 10th of every month a GitHub Actions job downloads the latest six months of Job Bank postings, reruns the matching, the re-employment plan and the new-products analysis, and republishes the tool. The figures in this README are from the April to September 2026 run; the live tool carries the latest window.
+
 ## What it does
 
 **For a worker** (the "Find my next job" tab):
@@ -69,7 +71,7 @@ These are model estimates. See **Limits**.
 
 Find a worker's next job, plan re-employment for both plants, and test which new products each workforce could build, all in the browser with nothing to install.
 
-[![Live app](https://img.shields.io/badge/Live_app-E5A21A?style=for-the-badge)](https://zosmano.github.io/next-shift/)
+[![Live app](https://img.shields.io/badge/Live_app-E5A21A?style=for-the-badge)](https://zosmano.github.io/autoworker-transition-platform/)
 [![Python pipeline](https://img.shields.io/badge/Python_pipeline-1E4D74?style=for-the-badge&logo=python&logoColor=white)](#run-it)
 [![6 dashboards](https://img.shields.io/badge/6_dashboards-152A3D?style=for-the-badge)](#dashboards)
 
@@ -114,18 +116,14 @@ python -m pip install -r requirements.txt
 ```
 
 ```bash
-python run_all.py
+python run_all.py --fetch
 ```
 
-- **Input data is not in the repository** because it is large (about 300 MB). Download it into `data/raw/` and point `ATP_FSA_BOUNDARY` and `ATP_ROAD_NETWORK` at the two StatCan zips. The file names are in the Data table below.
-  - [Job Bank job postings](https://open.canada.ca/data/en/dataset/ea639e28-c0fc-48bf-b5dd-b8899bd43072): the monthly files, saved as `jobbank_YYYY_MM.csv`
-  - [OaSIS](https://open.canada.ca/data/en/dataset/eeb3e442-9f19-4d12-8b38-c488fe4f6e5e)
-  - [ESDC Wages](https://open.canada.ca/data/en/dataset/adad580f-76b0-4502-bd05-20c125de9116)
-  - [StatCan 2021 boundary files](https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/index2021-eng.cfm): forward sortation areas
-  - [StatCan 2021 Road Network File](https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/rnf-frr/index2021-eng.cfm)
-  - The training list and the BLS staffing file are included in `data/`.
-- **Run time:** about 30 seconds once caches exist. Use `--rebuild` to re-read the Job Bank files and rebuild the road graph, or `--report` to redraw only the six report dashboards in seconds.
+- **`--fetch` downloads the open data** into `data/raw/` (about 300 MB, not in the repository): the latest six months of [Job Bank job postings](https://open.canada.ca/data/en/dataset/ea639e28-c0fc-48bf-b5dd-b8899bd43072) as `jobbank_YYYY_MM.csv` (months that fall out of the window are removed), and once only the [OaSIS](https://open.canada.ca/data/en/dataset/eeb3e442-9f19-4d12-8b38-c488fe4f6e5e) files and the 2025 [ESDC Wages](https://open.canada.ca/data/en/dataset/adad580f-76b0-4502-bd05-20c125de9116). Set the window length with `JOBBANK_MONTHS` in `atp/config.py`.
+- **StatCan geometry is in `data/derived/`.** StatCan's site refuses automated downloads, so the two things the tool needs from its [boundary file](https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/index2021-eng.cfm) and [Road Network File](https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/rnf-frr/index2021-eng.cfm) were computed once and saved: Ontario postal-area (FSA) centre points (`fsa_centroids_on.csv`) and drive minutes from each plant to 274,449 road nodes (`drive_nodes.npz`). To rebuild them, point `ATP_FSA_BOUNDARY` and `ATP_ROAD_NETWORK` at the two zips and run with `--rebuild`. The training list and the BLS staffing file are also in `data/`.
+- **Run time:** about 30 seconds once caches exist. Use `--rebuild` to re-read the Job Bank files and rebuild the road graph, `--report` to redraw only the six report dashboards in seconds, `--site` to also write the published page to `site/`, or `--no-report` to skip the dashboard images.
 - **Output:** `outputs/next_shift.html` is the self-contained app (about 1.5 MB). It works offline in any browser.
+- **Monthly refresh:** `.github/workflows/monthly.yml` runs `python run_all.py --fetch --site --no-report` on the 10th of each month (or on demand from the **Actions** tab) and publishes `site/` to GitHub Pages. The dashboard images use Windows fonts that GitHub's Linux runners lack, so redraw them locally with `--report`. The story films' figures come from each run, so they move with the data.
 
 ## Data
 
@@ -140,7 +138,7 @@ python run_all.py
 | `data/bls_oews_2025_staffing.json` | US BLS **Occupational Employment and Wage Statistics**, May 2025 national industry-specific estimates, for 10 industries (retrieved October 2026) | Hourly workforce of each candidate product. No Canadian occupation-by-industry table exists at this detail |
 | `data/training_programs.csv` | Curated from college and Ontario government pages; every link checked | 26 programs across Sheridan, Humber, Conestoga, Fanshawe and provincial routes |
 
-The Job Bank, OaSIS and wage files are under the Open Government Licence – Canada. The two large StatCan files are read from the sibling `Canada Post Analysis` folder by default; set `ATP_FSA_BOUNDARY` and `ATP_ROAD_NETWORK` to point elsewhere.
+The Job Bank, OaSIS and wage files are under the Open Government Licence – Canada. The two large StatCan files are read from the sibling `Canada Post Analysis` folder by default; set `ATP_FSA_BOUNDARY` and `ATP_ROAD_NETWORK` to point elsewhere. Without them, the tool uses the derived files in `data/derived/` (Statistics Canada, Open Government Licence – Canada).
 
 ## Method
 
@@ -218,7 +216,7 @@ Pay compares ESDC regional median wages for the product's jobs with those for th
 ## Next steps for a real deployment
 
 1. Load the members' actual job classifications and home postal codes, so commutes are measured from home rather than the plant.
-2. Add a weekly Job Bank refresh, and job feeds from Roshel and other employers committed to hiring.
+2. Add job feeds from Roshel and other employers committed to hiring (Job Bank postings already refresh monthly).
 3. Have counsellors record outcomes (applied, hired, enrolled) to calibrate the planner's assumptions.
 
 Analysis and design by Osman Zakaria, PMP · © 2026 Osman Zakaria, PMP

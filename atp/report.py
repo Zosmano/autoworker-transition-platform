@@ -25,6 +25,22 @@ plt.rcParams.update({"font.family": "Segoe UI", "font.size": 9, "text.color": IN
 I = {"people": "", "work": "", "pin": "", "car": "", "edu": "", "money": "",
      "check": "", "warn": "", "chart": "", "factory": "", "gear": "", "swap": "",
      "up": "", "down": "", "layers": "", "list": "", "history": "", "chevron": ""}
+def _summary():
+    return json.loads((C.OUT / "summary.json").read_text())
+
+
+def _displaced():
+    return sum(_summary()[k]["displaced"] for k in C.PLANTS)
+
+
+def _window():
+    """'Apr–Sep 2026' for the months of postings this run used."""
+    a, b = _summary()["postings"]["window"]
+    mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    (y0, m0), (y1, m1) = (map(int, a.split("-")), map(int, b.split("-")))
+    return f"{mon[m0 - 1]}–{mon[m1 - 1]} {y1}" if y0 == y1 else f"{mon[m0 - 1]} {y0}–{mon[m1 - 1]} {y1}"
+
+
 PAGES = [("Overview", "chart", "Both plants"), ("Re-employment plan", "people", "12-month placement"),
          ("Assemblers' options", "swap", "70% of the workforce"), ("Commute & training", "car", "Rush-hour drive"),
          ("Product fit", "factory", "10 candidate products"), ("Product trade-offs", "gear", "Pay, staff, retraining")]
@@ -71,7 +87,7 @@ def frame(page_no, kpis, source):
     fig.text(0.067, 0.843, "Autoworker transition platform", fontsize=7.4, color="#A9BCCB", ha="center")
     fig.text(0.067, 0.810, f"Page {page_no} of {len(PAGES)}", fontsize=7.5, color="#A9BCCB", ha="center")
     fig.text(0.067, 0.790, title.upper(), fontsize=10, family=DISPLAY, color=AMBER, ha="center")
-    boxes = [("Plants", "Brampton · Ingersoll"), ("Workers", "3,959 displaced"), ("Postings", "Job Bank, Apr–Sep 2026"), ("Scope", scope)]
+    boxes = [("Plants", "Brampton · Ingersoll"), ("Workers", f"{_displaced():,} displaced"), ("Postings", f"Job Bank, {_window()}"), ("Scope", scope)]
     for i, (lab, val) in enumerate(boxes):
         y = 0.70 - i * 0.085
         rbox(fig, 0.016, y, 0.102, 0.072, fc=BAND2, ec="#2C4D69", shadow=False)

@@ -3,23 +3,72 @@
     python run_all.py              # uses cached postings and drive times when present
     python run_all.py --rebuild    # re-reads the Job Bank files and rebuilds the road graph
     python run_all.py --report     # only redraws the six report dashboards from outputs/
+    python run_all.py --fetch      # first download the latest Job Bank months (and the fixed OaSIS and wage files)
+    python run_all.py --site       # also write the published page to site/
+    python run_all.py --no-report  # skip the dashboard images (GitHub's Linux runners lack their Windows fonts)
 """
 import argparse
 import json
+import re
+import shutil
 
 import pandas as pd
 
 from atp import config as C
 
 
+def site():
+    """The page GitHub Pages serves."""
+    if C.SITE.exists():
+        shutil.rmtree(C.SITE)
+    C.SITE.mkdir(parents=True)
+    html = (C.OUT / "next_shift.html").read_text(encoding="utf-8")
+    html = re.sub(r'\s*<meta name="claude:viewport-fit-sides"[^>]*>', "", html)
+    (C.SITE / "index.html").write_text(html, encoding="utf-8")
+    (C.SITE / ".nojekyll").write_text("", encoding="utf-8")
+    print("->", C.SITE / "index.html")
+
+
+SHORT_PRODUCT = {"Grid equipment (transformers, switchgear)": "Grid equipment", "Battery modules and energy-storage packs": "Battery packs",
+                 "Another car or light-truck program": "Another car program", "Armoured and military vehicles": "Armoured vehicles",
+                 "Engines, turbines and drivetrains": "Engines and drivetrains", "Trucks, buses and specialty bodies": "Trucks and buses",
+                 "Rail and transit vehicles": "Rail and transit", "Aerospace structures and parts": "Aerospace"}
+
+
+def film_numbers(summary, pl, flows):
+    """The figures the three story films quote, from this run, so they move with the data."""
+    out = {"assembler_share": round(100 * C.WORKFORCE_MIX["94200"])}
+    for key in C.PLANTS:
+        s = summary[key]
+        a = pl[(pl["plant"] == key) & (pl["origin"] == "94200")]
+        w = flows[(flows["plant"] == key) & (flows["product"] == "defence") & (flows["origin"] == "94200")
+                  & (flows["role_name"].str.startswith("Welders")) & (flows["stage"] == "retrain")]
+        out[key] = {"displaced": s["displaced"], "placed": s["placed_12m"],
+                    "placed_pct": round(100 * s["placed_12m"] / max(s["displaced"], 1)),
+                    "pay_pct": round(100 * s["pay_kept_placed"]), "jobs60": s["postings_within"][60],
+                    "assembler_placed_pct": round(100 * a.loc[a["target"].notna(), "workers"].sum() / max(a["workers"].sum(), 1)),
+                    "welders": int(round(float(w["workers"].sum()), -1)),
+                    "weld_months": int(w["months"].max()) if len(w) else None}
+    ready = summary["brampton"]["products_by_quick_redeployment"]
+    out["ready"] = [[SHORT_PRODUCT.get(n, n), int(100 * v + 0.5)] for n, v in ready.items()]   # half up: 74.5 -> 75
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rebuild", action="store_true")
     ap.add_argument("--report", action="store_true")
+    ap.add_argument("--fetch", action="store_true")
+    ap.add_argument("--site", action="store_true")
+    ap.add_argument("--no-report", action="store_true")
     a = ap.parse_args()
     if a.report:
         from atp import report
         return print("->", report.build()[0].parent)
+    if a.fetch:
+        from atp import fetch
+        if fetch.run():
+            (C.CACHE / "jobs_on.pkl").unlink(missing_ok=True)      # new postings: re-read and re-locate them
     if a.rebuild:
         for f in ("jobs_on.pkl", "drive_nodes.pkl"):
             (C.CACHE / f).unlink(missing_ok=True)
@@ -74,9 +123,13 @@ def main():
                            "window": [r["jobs"]["month"].min(), r["jobs"]["month"].max()]}
     (C.OUT / "summary.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
+    r["film"] = film_numbers(summary, pl, flows)
     app.build(r)
-    from atp import report
-    report.build()
+    if not a.no_report:
+        from atp import report
+        report.build()
+    if a.site:
+        site()
 
 
 if __name__ == "__main__":

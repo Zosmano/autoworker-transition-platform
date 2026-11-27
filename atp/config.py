@@ -5,6 +5,10 @@ import pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 CACHE = ROOT / "data" / "cache"
+# Small files derived once from the StatCan boundary and road files (whose site refuses automated downloads),
+# kept in the repository so the monthly cloud refresh can run without them. Rebuild with the zips and --rebuild.
+DERIVED = ROOT / "data" / "derived"
+SITE = ROOT / "site"
 OUT = ROOT / "outputs"
 TRAINING_FILE = ROOT / "data" / "training_programs.csv"
 
@@ -14,6 +18,7 @@ FSA_BOUNDARY_ZIP = pathlib.Path(os.environ.get("ATP_FSA_BOUNDARY", _CP / "Bounda
 ROAD_NETWORK_ZIP = pathlib.Path(os.environ.get("ATP_ROAD_NETWORK", _CP / "lrnf000r21a_e.zip"))
 
 JOBBANK_GLOB = "jobbank_*.csv"
+JOBBANK_MONTHS = 6          # rolling window of the latest monthly Job Bank files (atp/fetch.py)
 WAGES_FILE = RAW / "esdc_wages_2025.csv"
 
 # --- The two plants -------------------------------------------------------------------------------

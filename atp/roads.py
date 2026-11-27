@@ -31,6 +31,10 @@ def build():
     path = C.CACHE / "drive_nodes.pkl"
     if path.exists():
         return pd.read_pickle(path)
+    derived = C.DERIVED / "drive_nodes.npz"
+    if not C.ROAD_NETWORK_ZIP.exists() and derived.exists():
+        z = np.load(derived)
+        return pd.DataFrame({k: z[k] for k in z.files})
     r = _read_roads()
     ends = np.vstack([r[["x0", "y0"]].values, r[["x1", "y1"]].values]).round(0)
     nodes, inv = np.unique(ends, axis=0, return_inverse=True)

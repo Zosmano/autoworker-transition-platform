@@ -81,6 +81,7 @@ def payload(r):
         "rp": {"quick_months": RP.QUICK_MAX_MONTHS, "quick_match": RP.QUICK_MIN_MATCH,
                "retrain_months": RP.RETRAIN_MAX_MONTHS, "retrain_match": RP.RETRAIN_MIN_MATCH,
                "headcount": RP.HEADCOUNT_SHARE},
+        "film": r.get("film"),
     }
 
 

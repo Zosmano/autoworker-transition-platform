@@ -987,11 +987,20 @@ body.fk-on ${cfg.panels}{display:none!important}
   function roads(g, K, cx, cy, R, a) { g.save(); g.globalAlpha = a * .35; g.strokeStyle = P.steel; g.lineWidth = 1.5;
     for (let k = 0; k < 7; k++) { const an = k / 7 * 6.283 + .3; g.beginPath(); g.moveTo(cx, cy); g.quadraticCurveTo(cx + Math.cos(an + .3) * R * .5, cy + Math.sin(an + .3) * R * .36, cx + Math.cos(an) * R * 1.05, cy + Math.sin(an) * R * .76); g.stroke(); } g.restore(); }
   let MB = null;
+  // every figure the films quote comes from this run's data (D.film), so the films move with each monthly refresh
+  const F = D.film, B = F.brampton, I = F.cami, n = v => Math.round(v).toLocaleString("en"), r10 = v => n(Math.round(v / 10) * 10);
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MONL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const span = (names, sep) => { const [y0, m0] = D.window[0].split("-").map(Number), [y1, m1] = D.window[1].split("-").map(Number);
+    return y0 === y1 ? `${names[m0 - 1]}${sep}${names[m1 - 1]} ${y1}` : `${names[m0 - 1]} ${y0}${sep}${names[m1 - 1]} ${y1}`; };
+  const WIN = span(MON, "–"), WIN_WORDS = span(MONL, " to "), RATIO = Math.max(1, Math.round(B.jobs60 / Math.max(I.jobs60, 1)));
+  const ARM = (F.ready.find(([l]) => l === "Armoured vehicles") || [, 0])[1];
+  const WELD_M = [B.weld_months, I.weld_months].filter(Boolean).sort((a, b) => a - b), WELD_TXT = WELD_M.length ? (WELD_M[0] === WELD_M[WELD_M.length - 1] ? `${WELD_M[0]} months` : `${WELD_M[0]} to ${WELD_M[WELD_M.length - 1]} months`) : "several months";
 
-  const f1 = { id: "brampton", title: "Brampton: 2,759 workers", sub: "38,537 jobs within a rush-hour hour; about half placed",
-    acts: ["Stellantis Brampton: 2,759 autoworkers laid off. About 70% of them are assemblers.",
-      "Within a 60-minute rush-hour drive, 38,537 jobs were posted from April to September 2026. Each worker's skills are matched against them.",
-      "About 1,440 workers, 52%, place in good-fit local jobs within a year, keeping about 83% of their pay. Assemblers are the hard group."],
+  const f1 = { id: "brampton", title: `Brampton: ${n(B.displaced)} workers`, sub: `${n(B.jobs60)} jobs within a rush-hour hour; ${B.placed_pct}% placed`,
+    acts: [`Stellantis Brampton: ${n(B.displaced)} autoworkers laid off. About ${F.assembler_share}% of them are assemblers.`,
+      `Within a 60-minute rush-hour drive, ${n(B.jobs60)} jobs were posted from ${WIN_WORDS}. Each worker's skills are matched against them.`,
+      `About ${r10(B.placed)} workers, ${B.placed_pct}%, place in good-fit local jobs within a year, keeping about ${B.pay_pct}% of their pay. Assemblers are the hard group.`],
     cues: [[.4, "engine"], [2, "drop"], [8.5, "whoosh"], [9, "ping"], [16.4, "rise"], [18.6, "chime"], [21.4, "resolve"]],
     bed: t => ({ pad: .78, air: t < 8 ? .3 : .12, tick: t > 9 && t < 14 ? 6 : 0 }),
     draw(g, t, K) { K.bg(g, t); const cx = 480, cy = 270;
@@ -999,57 +1008,57 @@ body.fk-on ${cfg.panels}{display:none!important}
         K.factory(g, 640, 360, 1.6, "#2b4258", { smoke: t < 2 ? t : 0, win: t < 2 ? "rgba(240,179,58,.6)" : "rgba(255,255,255,.08)" });
         for (let i = 0; i < 26; i++) { const s = K.seg(t, 1.6 + i * .16, 4.6 + i * .16); if (s <= 0) continue; const x = 560 - s * (300 + (i % 6) * 40), y = 360 + (i % 3) * 8;
           K.person(g, x, y, .9, i % 10 < 7 ? P.amber : P.steel, { walk: t * 9, alpha: a, hat: "#ffd21f" }); }
-        K.big(g, Math.round(K.count(t, 1.6, 5, 0, 2759)).toLocaleString("en"), 120, 190, { size: 96, color: P.ink, alpha: a });
+        K.big(g, Math.round(K.count(t, 1.6, 5, 0, B.displaced)).toLocaleString("en"), 120, 190, { size: 96, color: P.ink, alpha: a });
         K.text(g, "workers laid off", 124, 222, { size: 20, color: theme.muted, alpha: a });
-        K.text(g, "≈70% assemblers", 124, 258, { size: 22, weight: 700, color: P.amber, alpha: a * K.seg(t, 4.6, 5.4), face: "head" }); }
+        K.text(g, `≈${F.assembler_share}% assemblers`, 124, 258, { size: 22, weight: 700, color: P.amber, alpha: a * K.seg(t, 4.6, 5.4), face: "head" }); }
       if (t >= 8.5) { const R = 210, grow = K.seg(t, 8.6, 11.6), a = K.seg(t, 8.5, 9.2);
         if (!MB) MB = market(K, 900, R, 1);
         g.save(); g.globalAlpha = a * .12; g.fillStyle = P.steel; g.beginPath(); for (let k = 0; k <= 60; k++) { const an = k / 60 * 6.283, wob = .75 + .25 * Math.sin(an * 3 + 1), r = R * wob * grow; g.lineTo(cx + Math.cos(an) * r, cy + Math.sin(an) * r * .72); } g.fill(); g.restore();
         roads(g, K, cx, cy, R * grow, a);
         const mv = K.seg(t, 16.6, 19);
-        MB.forEach((p, i) => { if (p[2] > grow) return; const placed = t > 16.4 && i % 100 < 52; K.dot(g, cx + p[0], cy + p[1], 2.2, placed ? P.good : P.amber, (placed ? 1 : .75) * a); });
+        MB.forEach((p, i) => { if (p[2] > grow) return; const placed = t > 16.4 && i % 100 < B.placed_pct; K.dot(g, cx + p[0], cy + p[1], 2.2, placed ? P.good : P.amber, (placed ? 1 : .75) * a); });
         K.pin(g, cx, cy, 1.6, P.crit);
         if (t < 16.4) { const b = 1 - K.seg(t, 15.7, 16.4);
-          K.big(g, Math.round(K.count(t, 9, 13, 0, 38537)).toLocaleString("en"), 60, 150, { size: 64, color: P.amber, alpha: a * b }); K.text(g, "jobs posted within 60 minutes", 62, 178, { size: 17, color: P.ink, alpha: a * b });
-          K.label(g, "Apr–Sep 2026 · rush-hour drive", 62, 204, { alpha: a * b, size: 11 }); }
+          K.big(g, Math.round(K.count(t, 9, 13, 0, B.jobs60)).toLocaleString("en"), 60, 150, { size: 64, color: P.amber, alpha: a * b }); K.text(g, "jobs posted within 60 minutes", 62, 178, { size: 17, color: P.ink, alpha: a * b });
+          K.label(g, `${WIN} · rush-hour drive`, 62, 204, { alpha: a * b, size: 11 }); }
         else { const b = K.seg(t, 16.4, 17.2);
           K.card(g, 640, 110, 280, 280, { alpha: b, fill: "rgba(8,16,24,.85)", stroke: "rgba(82,194,138,.45)" });
-          K.big(g, Math.round(K.count(t, 16.8, 19, 0, 52)) + "%", 780, 200, { size: 80, color: P.good, align: "center", alpha: b }); K.text(g, "placed within a year (≈1,440)", 780, 228, { size: 15, align: "center", color: P.ink, alpha: b });
-          K.label(g, "Pay kept", 668, 286, { alpha: b }); K.bar(g, 668, 298, 224, 14, .83 * K.seg(t, 18.4, 20), P.amber); K.text(g, Math.round(83 * K.seg(t, 18.4, 20)) + "%", 892, 286, { size: 16, align: "right", weight: 700, color: P.amber, alpha: b });
-          K.text(g, "Assemblers: about 1 in 3 place", 668, 352, { size: 15, color: P.crit, alpha: K.seg(t, 20, 20.8) }); } }
+          K.big(g, Math.round(K.count(t, 16.8, 19, 0, B.placed_pct)) + "%", 780, 200, { size: 80, color: P.good, align: "center", alpha: b }); K.text(g, `placed within a year (≈${r10(B.placed)})`, 780, 228, { size: 15, align: "center", color: P.ink, alpha: b });
+          K.label(g, "Pay kept", 668, 286, { alpha: b }); K.bar(g, 668, 298, 224, 14, B.pay_pct / 100 * K.seg(t, 18.4, 20), P.amber); K.text(g, Math.round(B.pay_pct * K.seg(t, 18.4, 20)) + "%", 892, 286, { size: 16, align: "right", weight: 700, color: P.amber, alpha: b });
+          K.text(g, `Assemblers: about ${B.assembler_placed_pct}% place`, 668, 352, { size: 15, color: P.crit, alpha: K.seg(t, 20, 20.8) }); } }
     } };
 
-  const f2 = { id: "ingersoll", title: "Ingersoll: the harder case", sub: "An eighth of the openings, and lower pay",
-    acts: ["GM CAMI Ingersoll: 1,200 workers laid off, in a smaller town.",
-      "Within an hour's drive there were 4,968 postings: an eighth of Brampton's, and at lower pay.",
-      "About 390 workers, 33%, place within a year, keeping 69% of their pay. Retraining, help with longer commutes and new production at the plant matter more here."],
+  const f2 = { id: "ingersoll", title: "Ingersoll: the harder case", sub: `1/${RATIO} of Brampton's openings, and lower pay`,
+    acts: [`GM CAMI Ingersoll: ${n(I.displaced)} workers laid off, in a smaller town.`,
+      `Within an hour's drive there were ${n(I.jobs60)} postings: about 1/${RATIO} of Brampton's, and at lower pay.`,
+      `About ${r10(I.placed)} workers, ${I.placed_pct}%, place within a year, keeping ${I.pay_pct}% of their pay. Retraining, help with longer commutes and new production at the plant matter more here.`],
     cues: [[.5, "engine"], [2.4, "drop"], [8.5, "whoosh"], [9.4, "ping"], [10.6, "ping"], [16.4, "rise"], [18.2, "pop"], [19.4, "pop"], [21.4, "resolve"]],
     bed: t => ({ pad: .75, air: .2 }),
     draw(g, t, K) { K.bg(g, t);
       if (t < 8.5) { const a = 1 - K.seg(t, 7.7, 8.4);
         K.factory(g, 480, 330, 1.3, "#2b4258", { smoke: t < 2 ? t : 0, win: t < 2 ? "rgba(240,179,58,.6)" : "rgba(255,255,255,.08)" });
         for (let i = 0; i < 12; i++) { const s = K.seg(t, 1.8 + i * .2, 4.8 + i * .2); if (s <= 0) continue; K.person(g, 420 - s * (220 + (i % 4) * 30), 330 + (i % 2) * 8, .85, P.amber, { walk: t * 9, alpha: a, hat: "#ffd21f" }); }
-        K.big(g, Math.round(K.count(t, 1.8, 5, 0, 1200)).toLocaleString("en"), 580, 200, { size: 92, color: P.ink, alpha: a }); K.text(g, "workers laid off · GM CAMI", 584, 232, { size: 19, color: theme.muted, alpha: a }); }
+        K.big(g, Math.round(K.count(t, 1.8, 5, 0, I.displaced)).toLocaleString("en"), 580, 200, { size: 92, color: P.ink, alpha: a }); K.text(g, "workers laid off · GM CAMI", 584, 232, { size: 19, color: theme.muted, alpha: a }); }
       if (t >= 8.5 && t < 16.4) { const a = K.seg(t, 8.5, 9.2) * (1 - K.seg(t, 15.7, 16.4));
-        [[260, "Brampton", 38537, 170, 1], [700, "Ingersoll", 4968, 61, 2]].forEach(([cx, name, n, R, sd], k) => { const gr = K.seg(t, 9 + k * 1.2, 11 + k * 1.2), pts = market(K, Math.round(n / 45), R, sd);
+        [[260, "Brampton", B.jobs60, 170, 1], [700, "Ingersoll", I.jobs60, Math.max(30, Math.round(170 * Math.sqrt(I.jobs60 / Math.max(B.jobs60, 1)))), 2]].forEach(([cx, name, n, R, sd], k) => { const gr = K.seg(t, 9 + k * 1.2, 11 + k * 1.2), pts = market(K, Math.round(n / 45), R, sd);
           g.save(); g.globalAlpha = a * .13; g.fillStyle = P.steel; g.beginPath(); g.ellipse(cx, 270, R * gr, R * .72 * gr, 0, 0, 6.283); g.fill(); g.restore();
           pts.forEach(p => p[2] <= gr && K.dot(g, cx + p[0], 270 + p[1], 2, P.amber, a * .8)); K.pin(g, cx, 270, 1.3, P.crit);
           K.text(g, name, cx, 420, { size: 24, face: "head", weight: 700, align: "center", color: P.ink, alpha: a });
           K.text(g, Math.round(n * gr).toLocaleString("en") + " postings", cx, 112, { size: 20, align: "center", color: P.amber, alpha: a * gr, weight: 700 }); });
-        K.text(g, "1 : 8", 480, 280, { size: 40, face: "head", weight: 700, align: "center", color: P.ink, alpha: a * K.seg(t, 12, 13) }); }
+        K.text(g, `1 : ${RATIO}`, 480, 280, { size: 40, face: "head", weight: 700, align: "center", color: P.ink, alpha: a * K.seg(t, 12, 13) }); }
       if (t >= 16.4) { const a = K.seg(t, 16.4, 17.2);
-        [["Placed within a year", 52, 33], ["Pay kept by those placed", 83, 69]].forEach(([l, b, i], k) => { const y = 150 + k * 130, r = K.seg(t, 17.2 + k * 1.2, 18.6 + k * 1.2);
+        [["Placed within a year", B.placed_pct, I.placed_pct], ["Pay kept by those placed", B.pay_pct, I.pay_pct]].forEach(([l, b, i], k) => { const y = 150 + k * 130, r = K.seg(t, 17.2 + k * 1.2, 18.6 + k * 1.2);
           K.label(g, l, 120, y, { alpha: a, color: P.ink });
           K.bar(g, 120, y + 16, 560, 22, b / 100 * r, P.steel); K.text(g, "Brampton " + Math.round(b * r) + "%", 700, y + 33, { size: 17, weight: 700, color: P.steel, alpha: a });
           K.bar(g, 120, y + 50, 560, 22, i / 100 * r, P.amber); K.text(g, "Ingersoll " + Math.round(i * r) + "%", 700, y + 67, { size: 17, weight: 700, color: P.amber, alpha: a }); });
         ["Retraining", "Longer commutes", "New production"].forEach((s, k) => K.text(g, "✓ " + s, 120 + k * 210, 418, { size: 16, weight: 700, color: P.good, alpha: K.seg(t, 20 + k * .5, 20.6 + k * .5) })); }
     } };
 
-  const READY = [["Grid equipment", 97], ["Battery packs", 95], ["Another car program", 95], ["EV and auto parts", 94], ["Factory-built housing", 92], ["Armoured vehicles", 84], ["Engines and drivetrains", 82], ["Trucks and buses", 81], ["Rail and transit", 75], ["Aerospace", 39]];
-  const f3 = { id: "products", title: "A new product line", sub: "Armoured vehicles: 84% ready within six months",
+  const READY = F.ready;
+  const f3 = { id: "products", title: "A new product line", sub: `Armoured vehicles: ${ARM}% ready within six months`,
     acts: ["What if the plant builds something new? Assembly, material handling and trades skills carry over to almost any line-based product.",
-      "For armoured vehicles, 84% of the hourly jobs can be filled from the current workforce within six months. Welding is the main gap.",
-      "About 280 Brampton and 120 Ingersoll assemblers would retrain as welders: 7 to 8 months at a nearby college, for pay around 85% of auto jobs."],
+      `For armoured vehicles, ${ARM}% of the hourly jobs can be filled from the current workforce within six months. Welding is the main gap.`,
+      `About ${n(B.welders)} Brampton and ${n(I.welders)} Ingersoll assemblers would retrain as welders: ${WELD_TXT} at a nearby college, for pay around 85% of auto jobs.`],
     cues: [[.4, "engine"], [2.2, "pop"], [3.8, "pop"], [5.4, "pop"], [8.5, "whoosh"], [12.4, "ping"], [16.4, "rise"], [18, "tick"], [19, "tick"], [20, "tick"], [21.4, "resolve"]],
     bed: t => ({ pad: .78, air: .14, tick: t < 7 ? 2 : 0 }),
     draw(g, t, K) { K.bg(g, t);
@@ -1072,7 +1081,7 @@ body.fk-on ${cfg.panels}{display:none!important}
           K.text(g, l, 330, y + 15, { size: 15, align: "right", color: hi ? P.amber : P.ink, alpha: a, weight: hi ? 700 : 500 });
           K.bar(g, 344, y + 4, 460, 14, v / 100 * r, hi ? P.amber : v < 50 ? P.crit : P.steel); K.text(g, Math.round(v * r) + "%", 816, y + 16, { size: 14, weight: 700, color: hi ? P.amber : theme.muted, alpha: a }); }); }
       if (t >= 16.4) { const a = K.seg(t, 16.4, 17.2);
-        [["Brampton", 280], ["Ingersoll", 120]].forEach(([s, n], k) => { const x = 150 + k * 260;
+        [["Brampton", B.welders], ["Ingersoll", I.welders]].forEach(([s, n], k) => { const x = 150 + k * 260;
           K.big(g, Math.round(K.count(t, 16.8 + k * .4, 18.6 + k * .4, 0, n)), x, 220, { size: 88, color: P.amber, alpha: a }); K.text(g, s + " assemblers → welders", x + 2, 252, { size: 16, color: P.ink, alpha: a }); });
         const pr = K.seg(t, 17.6, 20.8); K.label(g, "College welding program", 150, 312, { alpha: a, color: P.ink }); K.bar(g, 150, 326, 520, 16, pr, P.good);
         ["0", "2", "4", "6", "8 months"].forEach((l, k) => K.text(g, l, 150 + k * 130, 366, { size: 13, color: theme.muted, alpha: a, align: k === 4 ? "right" : "center" }));
